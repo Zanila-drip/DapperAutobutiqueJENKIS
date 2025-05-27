@@ -21,15 +21,23 @@ export const registerUser = (data) => api.post('/auth/register/', {
     phone: data.phone,
     address: data.address
 });
-
-export const loginUser = (data) => api.post('/auth/login/', {
-    email: data.email,  // Nombre exacto del campo esperado por el backend
-    password: data.password
-}, {
-    headers: {
-        'Content-Type': 'application/json'
+export const loginUser = async (data) => {
+    try {
+        const response = await api.post('/auth/login/', {
+            email: data.email,
+            password: data.password
+        });
+        return {
+            data: {
+                access: response.data.access,
+                refresh: response.data.refresh
+            }
+        };
+    } catch (error) {
+        console.error("Error completo:", error.response?.data);
+        throw error;
     }
-});
+};
 export const getProducts = () => api.get('/products/');
 export const createOrder = (data) => api.post('/orders/', data);
 export const getOrders = () => api.get('/orders/history/');

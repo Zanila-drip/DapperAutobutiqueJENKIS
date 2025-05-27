@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Input, VStack } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
+import { loginUser } from '../services/api';
 
 export default function Login() {
     const [email, setEmail] = useState('');

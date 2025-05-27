@@ -5,13 +5,13 @@ from .serializers import CustomTokenObtainPairSerializer, RegisterSerializer
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
-    
+
     def post(self, request, *args, **kwargs):
-        # Forzar el uso del serializer personalizado
-        request.data._mutable = True
-        request.data['email'] = request.data.get('email')
-        return super().post(request, *args, **kwargs)
-        
+        response = super().post(request, *args, **kwargs)
+        # Verificación adicional para debug
+        print("Response data:", response.data)
+        return response
+               
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
