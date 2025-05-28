@@ -1,39 +1,31 @@
-import { useEffect, useState } from 'react';
-import { Table, Thead, Tbody, Tr, Th, Td, Button } from '@chakra-ui/react';
-import { getProducts } from '../services/api';
+// pages/AdminPanel.jsx
+import { useState, useEffect } from 'react';
+import { Tabs, TabList, Tab, TabPanels, TabPanel, Box } from '@chakra-ui/react';
+import AdminProducts from '../components/admin/AdminProducts';
+import AdminUsers from '../components/admin/AdminUsers';
+import AdminCategories from '../components/admin/AdminCategories';
 
 export default function AdminPanel() {
-    const [products, setProducts] = useState([]);
-
-    useEffect(() => {
-        const fetchProducts = async () => {
-            const response = await getProducts();
-            setProducts(response.data);
-        };
-        fetchProducts();
-    }, []);
-
-    return (
-        <Table>
-            <Thead>
-                <Tr>
-                    <Th>Nombre</Th>
-                    <Th>Precio</Th>
-                    <Th>Acciones</Th>
-                </Tr>
-            </Thead>
-            <Tbody>
-                {products.map((product) => (
-                    <Tr key={product.id}>
-                        <Td>{product.name}</Td>
-                        <Td>${product.price}</Td>
-                        <Td>
-                            <Button>Editar</Button>
-                            <Button ml={2}>Eliminar</Button>
-                        </Td>
-                    </Tr>
-                ))}
-            </Tbody>
-        </Table>
-    );
+  return (
+    <Box p={4}>
+      <Tabs isFitted variant="enclosed">
+        <TabList mb="1em">
+          <Tab>Productos</Tab>
+          <Tab>Categorías</Tab>
+          <Tab>Usuarios</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel>
+            <AdminProducts />
+          </TabPanel>
+          <TabPanel>
+            <AdminCategories />
+          </TabPanel>
+          <TabPanel>
+            <AdminUsers />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </Box>
+  );
 }

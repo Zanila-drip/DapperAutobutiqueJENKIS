@@ -10,5 +10,5 @@ class CustomUser(AbstractUser):
     phone = models.CharField(max_length=20, blank=True)
     address = models.TextField(blank=True)
 
-    def __str__(self):
-        return self.username
+    def is_admin(self):
+        return self.user_type == 'admin' or self.is_superuser

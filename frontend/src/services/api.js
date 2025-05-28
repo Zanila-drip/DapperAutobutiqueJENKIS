@@ -38,6 +38,22 @@ export const loginUser = async (data) => {
         throw error;
     }
 };
+// Funciones de productos
 export const getProducts = () => api.get('/products/');
-export const createOrder = (data) => api.post('/orders/', data);
-export const getOrders = () => api.get('/orders/history/');
+export const getProduct = (id) => api.get(`/products/${id}/`);
+export const createProduct = (productData) => api.post('/products/', productData);
+export const updateProduct = (id, productData) => api.put(`/products/${id}/`, productData);
+export const deleteProduct = (id) => api.delete(`/products/${id}/`);
+
+// Funciones de categorías
+export const getCategories = () => api.get('/categories/');
+export const createCategory = (categoryData) => api.post('/categories/', categoryData);
+export const deleteCategory = (id) => api.delete(`/categories/${id}/`);
+
+// Funciones de usuarios
+export const getUsers = () => api.get('/users/');
+export const deleteUser = (id) => api.delete(`/users/${id}/`);
+
+// Funciones de órdenes
+export const getOrders = () => api.get('/orders/');
+export const createOrder = (orderData) => api.post('/orders/', orderData);

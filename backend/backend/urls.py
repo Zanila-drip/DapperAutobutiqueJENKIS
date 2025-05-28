@@ -1,5 +1,9 @@
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.http import JsonResponse
+
+def home(request):
+    return JsonResponse({"status": "API funcionando", "version": "1.0.0"})
 
 urlpatterns = [
     path('api/auth/', include('users.urls')),
