@@ -21,16 +21,22 @@ export const registerUser = (data) => api.post('/auth/register/', {
     phone: data.phone,
     address: data.address
 });
+
 export const loginUser = async (data) => {
     try {
         const response = await api.post('/auth/login/', {
             email: data.email,
             password: data.password
         });
+        
+        // IMPORTANTE: Devolver los datos adicionales de la respuesta
         return {
             data: {
                 access: response.data.access,
-                refresh: response.data.refresh
+                refresh: response.data.refresh,
+                // Asegurar que estos campos vienen del backend
+                user_type: response.data.user_type,
+                user_id: response.data.user_id
             }
         };
     } catch (error) {
@@ -38,6 +44,7 @@ export const loginUser = async (data) => {
         throw error;
     }
 };
+
 // Funciones de productos
 export const getProducts = () => api.get('/products/');
 export const getProduct = (id) => api.get(`/products/${id}/`);
@@ -50,10 +57,25 @@ export const getCategories = () => api.get('/categories/');
 export const createCategory = (categoryData) => api.post('/categories/', categoryData);
 export const deleteCategory = (id) => api.delete(`/categories/${id}/`);
 
-// Funciones de usuarios
-export const getUsers = () => api.get('/users/');
-export const deleteUser = (id) => api.delete(`/users/${id}/`);
+// Funciones de usuarios (actualizadas para usar el endpoint correcto)
+export const getUsers = () => api.get('/auth/users/');
+export const deleteUser = (id) => api.delete(`/auth/users/${id}/`);
 
 // Funciones de órdenes
 export const getOrders = () => api.get('/orders/');
-export const createOrder = (orderData) => api.post('/orders/', orderData);
+export const createOrder = (orderData) => {
+    // Asegurarse de que el método de pago está incluido
+    const data = {
+      ...orderData,
+      items: orderData.items.map(item => ({
+        product: item.product,  // Asegurar que es el ID del producto
+        quantity: item.quantity
+      }))
+    };
+    
+    return api.post('/orders/', data);
+  };
+  
+export const updateProductStock = (id, stockData) => {
+    return api.patch(`/products/${id}/`, stockData);
+  };

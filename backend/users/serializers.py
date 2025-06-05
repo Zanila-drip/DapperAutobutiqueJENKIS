@@ -7,35 +7,24 @@ from .models import CustomUser
 User = get_user_model()
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    username_field = 'email'  # Especificamos que usaremos email como nombre de usuario
+    username_field = 'email'
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        
+        # Añadir claims personalizados al token JWT
+        token['user_type'] = user.user_type
+        token['user_id'] = user.id
+        return token
 
     def validate(self, attrs):
-        # Obtenemos email y password del request
-        email = attrs.get('email')
-        password = attrs.get('password')
-
-        if not email or not password:
-            raise serializers.ValidationError("Se requieren email y contraseña")
-
-        # Autenticación personalizada por email
-        user = User.objects.filter(email=email).first()
-
-        if user and user.check_password(password):
-            if not user.is_active:
-                raise serializers.ValidationError("La cuenta está desactivada")
-            
-            # Generamos el token JWT
-            data = {}
-            refresh = self.get_token(user)
-
-            data['refresh'] = str(refresh)
-            data['access'] = str(refresh.access_token)
-            data['user_type'] = user.user_type
-            data['user_id'] = user.id
-
-            return data
-        else:
-            raise serializers.ValidationError("Credenciales inválidas")
+        data = super().validate(attrs)
+        
+        # Añadir datos adicionales a la respuesta
+        data['user_type'] = self.user.user_type
+        data['user_id'] = self.user.id
+        return data
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,13 +34,9 @@ class UserSerializer(serializers.ModelSerializer):
             'password': {'write_only': True}
         }
 
+# users/serializers.py
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
-        write_only=True,
-        required=True,
-        style={'input_type': 'password'}
-    )
-    password2 = serializers.CharField(
         write_only=True,
         required=True,
         style={'input_type': 'password'}
@@ -59,15 +44,10 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'password', 'password2', 'phone', 'address']
+        fields = ['username', 'email', 'password', 'phone', 'address']
         extra_kwargs = {
             'user_type': {'read_only': True}
         }
-
-    def validate(self, data):
-        if data['password'] != data['password2']:
-            raise serializers.ValidationError({"password": "Las contraseñas no coinciden"})
-        return data
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -76,9 +56,10 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
             phone=validated_data.get('phone', ''),
             address=validated_data.get('address', ''),
-            user_type='customer'  # Valor por defecto
+            user_type='customer'
         )
         return user
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:

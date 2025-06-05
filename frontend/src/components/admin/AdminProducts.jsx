@@ -1,65 +1,89 @@
-import { useState, useEffect } from 'react';
-import { Table, Thead, Tbody, Tr, Th, Td, Button, IconButton } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
+import { 
+  Table, Thead, Tbody, Tr, Th, Td, 
+  Button, IconButton, Text 
+} from '@chakra-ui/react';
 import { AddIcon, EditIcon, DeleteIcon } from '@chakra-ui/icons';
 import { getProducts, deleteProduct } from '../../services/api';
 import ProductForm from './ProductForm';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [currentProduct, setCurrentProduct] = useState(null);
 
   useEffect(() => {
-    fetchProducts();
+    loadProducts();
   }, []);
 
-  const fetchProducts = async () => {
-    const response = await getProducts();
-    setProducts(response.data);
+  const loadProducts = async () => {
+    try {
+      const response = await getProducts();
+      setProducts(response.data);
+    } catch (error) {
+      console.error("Error cargando productos:", error);
+    }
   };
 
   const handleDelete = async (id) => {
-    await deleteProduct(id);
-    fetchProducts();
+    if (window.confirm("¿Estás seguro de eliminar este producto?")) {
+      await deleteProduct(id);
+      loadProducts();
+    }
   };
 
   return (
-    <>
-      <Button leftIcon={<AddIcon />} onClick={() => {
-        setCurrentProduct(null);
-        setIsFormOpen(true);
-      }}>
-        Añadir Producto
+    <div>
+      <Button 
+        leftIcon={<AddIcon />} 
+        colorScheme="teal" 
+        mb={4}
+        onClick={() => {
+          setSelectedProduct(null);
+          setIsFormOpen(true);
+        }}
+      >
+        Nuevo Producto
       </Button>
-      
+
       <Table variant="striped">
         <Thead>
           <Tr>
             <Th>Nombre</Th>
             <Th>Precio</Th>
             <Th>Stock</Th>
+            <Th>Categoría</Th> {/* Nueva columna añadida */}
             <Th>Acciones</Th>
           </Tr>
         </Thead>
         <Tbody>
-          {products.map((product) => (
+          {products.map(product => (
             <Tr key={product.id}>
               <Td>{product.name}</Td>
               <Td>${product.price}</Td>
               <Td>{product.stock}</Td>
               <Td>
+                {product.category ? (
+                  <Text>{product.category.name}</Text>
+                ) : (
+                  <Text color="gray.500">Sin categoría</Text>
+                )}
+              </Td>
+              <Td>
                 <IconButton
                   icon={<EditIcon />}
+                  aria-label="Editar"
+                  mr={2}
                   onClick={() => {
-                    setCurrentProduct(product);
+                    setSelectedProduct(product);
                     setIsFormOpen(true);
                   }}
-                  mr={2}
                 />
                 <IconButton
                   icon={<DeleteIcon />}
-                  onClick={() => handleDelete(product.id)}
+                  aria-label="Eliminar"
                   colorScheme="red"
+                  onClick={() => handleDelete(product.id)}
                 />
               </Td>
             </Tr>
@@ -67,12 +91,12 @@ export default function AdminProducts() {
         </Tbody>
       </Table>
 
-      <ProductForm 
+      <ProductForm
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
-        product={currentProduct}
-        onSuccess={fetchProducts}
+        product={selectedProduct}
+        onSuccess={loadProducts}
       />
-    </>
+    </div>
   );
 }

@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-tu_clave_secreta_aqui_32_caracteres')  
 ROOT_URLCONF = 'backend.urls' 
 
@@ -19,6 +21,9 @@ INSTALLED_APPS = [
     'orders',
 ]
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # JWT Authentication
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -27,6 +32,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ),
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.MultiPartParser',  # Para soportar FormData
+        'rest_framework.parsers.FormParser',
+    ],
 }
 
 # CORS (Permitir conexión con el frontend)

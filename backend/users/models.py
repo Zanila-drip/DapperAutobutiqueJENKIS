@@ -6,9 +6,20 @@ class CustomUser(AbstractUser):
         ('admin', 'Admin'),
         ('customer', 'Customer'),
     )
-    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='customer')
+    user_type = models.CharField(
+        max_length=10, 
+        choices=USER_TYPE_CHOICES, 
+        default='customer'
+    )
     phone = models.CharField(max_length=20, blank=True)
     address = models.TextField(blank=True)
 
     def is_admin(self):
         return self.user_type == 'admin' or self.is_superuser
+        
+    class Meta:
+        permissions = [
+            ("manage_users", "Can manage users"),
+            ("manage_products", "Can manage products"),
+            ("manage_categories", "Can manage categories"),
+        ]
