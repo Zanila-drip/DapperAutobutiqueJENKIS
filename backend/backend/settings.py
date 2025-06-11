@@ -42,8 +42,10 @@ REST_FRAMEWORK = {
 # CORS (Permitir conexión con el frontend)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://68.183.250.38:5173",
 ]
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False
 
 # Base de datos PostgreSQL
 DATABASES = {
