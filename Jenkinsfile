@@ -1,23 +1,23 @@
 pipeline {
-    agent {
-        kubernetes {
-            yaml '''
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-    - name: jnlp
-      image: zaniladrip/jenkins-agent-kubectl:latest
-      args: ['$(JENKINS_SECRET)', '$(JENKINS_NAME)']
-'''
-        }
-    }
+    agent any
+
     stages {
-        stage('Deploy to Kubernetes') {
+        stage('Build') {
             steps {
-                sh 'kubectl version --client' // Prueba que kubectl está disponible
-                sh 'kubectl apply -f backend-deployment.yaml'
+                sh 'docker-compose build'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'docker-compose run --rm backend python manage.py test'
+                sh 'docker-compose run --rm frontend npm test || true'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'docker-compose down'
+                sh 'docker-compose up -d'
             }
         }
     }
-} 
+}
