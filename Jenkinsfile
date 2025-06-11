@@ -1,22 +1,47 @@
 pipeline {
     agent any
 
+    environment {
+        REGISTRY = "registry.digitalocean.com/dapperautobutique"
+        KUBECONFIG_CREDENTIALS = 'kubeconfig-credential-id'
+        DOCKERHUB_CREDENTIALS = 'do-registry-credential-id'
+    }
+
     stages {
-        stage('Build') {
+        stage('Build Backend') {
             steps {
-                sh 'docker-compose build'
+                dir('backend') {
+                    script {
+                        docker.withRegistry("https://${env.REGISTRY}", "${DOCKERHUB_CREDENTIALS}") {
+                            def backendImage = docker.build("${env.REGISTRY}/backend:latest")
+                            backendImage.push()
+                        }
+                    }
+                }
             }
         }
-        stage('Test') {
+        stage('Build Frontend') {
             steps {
-                sh 'docker-compose run --rm backend python manage.py test'
-                sh 'docker-compose run --rm frontend npm test || true'
+                dir('frontend') {
+                    script {
+                        docker.withRegistry("https://${env.REGISTRY}", "${DOCKERHUB_CREDENTIALS}") {
+                            def frontendImage = docker.build("${env.REGISTRY}/frontend:latest")
+                            frontendImage.push()
+                        }
+                    }
+                }
             }
         }
-        stage('Deploy') {
+        stage('Deploy to Kubernetes') {
             steps {
-                sh 'docker-compose down'
-                sh 'docker-compose up -d'
+                withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIALS}", variable: 'KUBECONFIG')]) {
+                    sh '''
+                        export KUBECONFIG=$KUBECONFIG
+                        kubectl apply -f k8s-manifiestos/postgres-deployment.yaml
+                        kubectl apply -f k8s-manifiestos/backend-deployment.yaml
+                        kubectl apply -f k8s-manifiestos/frontend-deployment.yaml
+                    '''
+                }
             }
         }
     }

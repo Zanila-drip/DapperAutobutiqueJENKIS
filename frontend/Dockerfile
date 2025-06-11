@@ -1,21 +1,14 @@
-FROM node:18-alpine
-
+FROM node:18-alpine AS build
 WORKDIR /app
-
-# Copiar package.json y package-lock.json
 COPY package*.json ./
-
-# Instalar dependencias
 RUN npm install
-
-# Copiar el código del proyecto
 COPY . .
-
-# Construir la aplicación
 RUN npm run build
 
-# Exponer el puerto
-EXPOSE 5173
-
-# Comando para ejecutar la aplicación
-CMD ["npm", "run", "dev", "--", "--host"] 
+FROM nginx:alpine
+WORKDIR /usr/share/nginx/html
+COPY --from=build /app/dist .
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,8 +1,9 @@
 // src/services/api.js
 import axios from 'axios';
 
+const apiUrl = window.env?.VITE_API_URL || 'http://localhost:8000';
 const api = axios.create({
-    baseURL: 'http://localhost:8000/api',
+    baseURL: apiUrl + '/api',
 });
 
 // Interceptor para agregar el token JWT a cada petición
