@@ -9,18 +9,16 @@ export default function LoginRedirect() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      // Redirección basada en tipo de usuario
-      if (user.userType === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/shop');
-      }
+  if (user) {
+    if (user.isSuperuser || user.userType === 'admin') {
+      navigate('/admin');
     } else {
-      // Si no hay usuario, volver al inicio
-      navigate('/');
+      navigate('/shop');
     }
-  }, [user, navigate]);
+  } else {
+    navigate('/');
+  }
+}, [user, navigate]);
 
   return (
     <Box textAlign="center" mt={10}>
