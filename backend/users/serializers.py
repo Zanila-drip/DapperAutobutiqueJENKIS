@@ -16,6 +16,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Añadir claims personalizados al token JWT
         token['user_type'] = user.user_type
         token['user_id'] = user.id
+        token['is_superuser'] = user.is_superuser
+        token['is_staff'] = user.is_staff
         return token
 
     def validate(self, attrs):
@@ -24,12 +26,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Añadir datos adicionales a la respuesta
         data['user_type'] = self.user.user_type
         data['user_id'] = self.user.id
+        data['is_superuser'] = self.user.is_superuser
+        data['is_staff'] = self.user.is_staff
         return data
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'user_type', 'phone', 'address']
+        fields = ['id', 'username', 'email', 'user_type', 'phone', 'address', 'is_superuser', 'is_staff']
         extra_kwargs = {
             'password': {'write_only': True}
         }
